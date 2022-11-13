@@ -1,5 +1,5 @@
 import unittest
-from zeugs.math.display import duration
+from redzoo.math.display import duration
 from datetime import datetime, timedelta
 
 

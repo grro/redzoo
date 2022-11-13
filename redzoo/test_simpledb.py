@@ -1,6 +1,6 @@
 import unittest
 from time import sleep
-from zeugs.database.simple import SimpleDB
+from redzoo.database.simple import SimpleDB
 
 
 
