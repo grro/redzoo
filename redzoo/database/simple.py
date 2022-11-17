@@ -9,14 +9,15 @@ from typing import Any, Dict, List
 
 
 
-@dataclass
+
 class Entry:
-    expire_date : datetime
-    value: Any
+
+    def __init__(self, value: Any, expire_date: datetime):
+        self.expire_date = expire_date.strftime("%Y.%m.%d %H:%M:%S")
+        self.value = value
 
     def is_expired(self):
-        return datetime.now() > self.expire_date
-
+        return datetime.now() > datetime.strptime(self.expire_date, "%Y.%m.%d %H:%M:%S")
 
 
 class SimpleDB:
@@ -46,7 +47,7 @@ class SimpleDB:
         return key in self.keys()
 
     def put(self, key: str, value: Any, ttl_sec: int = 1000*365*24*60*60):  # default ttl: 1000 years
-        self.__data[key] = Entry(datetime.now() + timedelta(seconds=ttl_sec), value)
+        self.__data[key] = Entry(value, datetime.now() + timedelta(seconds=ttl_sec))
         if datetime.now() > (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
             self.__store()
             self.__last_time_stored = datetime.now()
