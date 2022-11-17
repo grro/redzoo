@@ -4,7 +4,6 @@ import shutil
 import logging
 from datetime import datetime, timedelta
 from appdirs import site_data_dir
-from dataclasses import dataclass
 from typing import Any, Dict, List
 
 
@@ -13,11 +12,19 @@ from typing import Any, Dict, List
 class Entry:
 
     def __init__(self, value: Any, expire_date: datetime):
-        self.expire_date = expire_date.strftime("%Y.%m.%d %H:%M:%S")
+        self.expire_date = expire_date
         self.value = value
 
     def is_expired(self):
-        return datetime.now() > datetime.strptime(self.expire_date, "%Y.%m.%d %H:%M:%S")
+        return datetime.now() > self.expire_date
+
+    def to_dict(self) -> Dict:
+        return {"expire_date": self.expire_date.strftime("%Y.%m.%d %H:%M:%S"),
+                "value": self.value}
+
+    @staticmethod
+    def from_dict(dict: Dict):
+        return Entry(dict['value'], datetime.strptime(dict['expire_date'], "%Y.%m.%d %H:%M:%S"))
 
 
 class SimpleDB:
@@ -74,7 +81,6 @@ class SimpleDB:
         self.__data = {}
         self.__store()
 
-
     def __remove_expired(self):
         for key in list(self.__data.keys()):
             entry = self.__data[key]
@@ -83,9 +89,10 @@ class SimpleDB:
 
     def __load(self) -> Dict:
         if os.path.isfile(self.__filename):
-            with open(self.__filename, 'r') as file:
+            with open(self.__filename, 'r', encoding="UTF-8") as file:
                 try:
-                    return json.load(file)
+                    data = json.load(file)
+                    return {name: Entry.from_dict(data[name]) for name in data.keys()}
                 except Exception as e:
                     logging.warning("could not load " + self.__filename + " " + str(e))
         return {}
@@ -97,8 +104,9 @@ class SimpleDB:
         except Exception as e:
             logging.info("error occurred removing expired records " + str(e))
         try:
-            with open(tempname, 'w') as file:
-                json.dump(self.__data, file)
+            with open(tempname, 'w', encoding="UTF-8") as file:
+                data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
+                json.dump(data, file)
             shutil.move(tempname, self.__filename)
         finally:
             os.remove(tempname) if os.path.exists(tempname) else None

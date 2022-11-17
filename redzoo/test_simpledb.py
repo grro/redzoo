@@ -27,5 +27,14 @@ class SimpleDbTest(unittest.TestCase):
         self.assertIs(55, db.get("4"))
 
 
+    def test_db_persistence(self):
+        db = SimpleDB("test2", sync_period_sec=0)
+        db.clear()
+        db.put("1", 5)
+        self.assertIs(5, db.get("1"))
+
+        db = SimpleDB("test2", sync_period_sec=0)
+        self.assertIs(5, db.get("1"))
+
 if __name__ == '__main__':
     unittest.main()
