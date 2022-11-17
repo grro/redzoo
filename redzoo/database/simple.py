@@ -1,5 +1,6 @@
 import os
 import json
+import gzip
 import shutil
 import logging
 from datetime import datetime, timedelta
@@ -34,7 +35,7 @@ class SimpleDB:
         directory = site_data_dir("simpledb", appauthor=False)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        self.__filename = os.path.join(directory, name + ".json")
+        self.__filename = os.path.join(directory, name + ".json.gzip")
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
         logging.info("simple db: using " + self.__filename + " (" + str(len(self.__data)) + " entries)")
@@ -89,9 +90,10 @@ class SimpleDB:
 
     def __load(self) -> Dict:
         if os.path.isfile(self.__filename):
-            with open(self.__filename, 'r', encoding="UTF-8") as file:
+            with gzip.open(self.__filename, "rb") as file:
                 try:
-                    data = json.load(file)
+                    json_data = file.read()
+                    data = json.loads(json_data.decode("UTF-8"))
                     return {name: Entry.from_dict(data[name]) for name in data.keys()}
                 except Exception as e:
                     logging.warning("could not load " + self.__filename + " " + str(e))
@@ -104,9 +106,9 @@ class SimpleDB:
         except Exception as e:
             logging.info("error occurred removing expired records " + str(e))
         try:
-            with open(tempname, 'w', encoding="UTF-8") as file:
-                data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
-                json.dump(data, file)
+            data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
+            with gzip.open(tempname, "wb") as file:
+                file.write(json.dumps(data).encode("UTF-8"))
             shutil.move(tempname, self.__filename)
         finally:
             os.remove(tempname) if os.path.exists(tempname) else None
