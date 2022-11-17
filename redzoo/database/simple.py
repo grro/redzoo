@@ -1,5 +1,5 @@
 import os
-import pickle
+import json
 import shutil
 import logging
 from datetime import datetime, timedelta
@@ -26,7 +26,7 @@ class SimpleDB:
         directory = site_data_dir("simpledb", appauthor=False)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        self.__filename = os.path.join(directory, name + ".p")
+        self.__filename = os.path.join(directory, name + ".json")
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
         logging.info("simple db: using " + self.__filename + " (" + str(len(self.__data)) + " entries)")
@@ -45,13 +45,13 @@ class SimpleDB:
     def has(self, key) -> bool:
         return key in self.keys()
 
-    def put(self, key, value: Any, ttl_sec: int = 1000*365*24*60*60):  # default ttl: 1000 years
+    def put(self, key: str, value: Any, ttl_sec: int = 1000*365*24*60*60):  # default ttl: 1000 years
         self.__data[key] = Entry(datetime.now() + timedelta(seconds=ttl_sec), value)
         if datetime.now() > (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
             self.__store()
             self.__last_time_stored = datetime.now()
 
-    def get(self, key, default_value: Any = None):
+    def get(self, key: str, default_value: Any = None):
         entry = self.__data.get(key, None)
         if entry is None or entry.is_expired():
             return default_value
@@ -82,8 +82,11 @@ class SimpleDB:
 
     def __load(self) -> Dict:
         if os.path.isfile(self.__filename):
-            with open(self.__filename, 'rb') as file:
-                return pickle.load(file)
+            with open(self.__filename, 'r') as file:
+                try:
+                    return json.load(file)
+                except Exception as e:
+                    logging.warning("could not load " + self.__filename + " " + str(e))
         return {}
 
     def __store(self):
@@ -93,8 +96,8 @@ class SimpleDB:
         except Exception as e:
             logging.info("error occurred removing expired records " + str(e))
         try:
-            with open(tempname, 'wb') as file:
-                pickle.dump(self.__data, file)
+            with open(tempname, 'w') as file:
+                json.dump(self.__data, file)
             shutil.move(tempname, self.__filename)
         finally:
             os.remove(tempname) if os.path.exists(tempname) else None
