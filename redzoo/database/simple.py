@@ -35,7 +35,7 @@ class SimpleDB:
         directory = site_data_dir("simpledb", appauthor=False)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        self.__filename = os.path.join(directory, name + ".json.gzip")
+        self.__filename = os.path.join(directory, name + ".json.gz")
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
         logging.info("simple db: using " + self.__filename + " (" + str(len(self.__data)) + " entries)")
