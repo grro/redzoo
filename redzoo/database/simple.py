@@ -20,8 +20,8 @@ class Entry:
         return datetime.now() > self.expire_date
 
     def to_dict(self) -> Dict:
-        return {"expire_date": self.expire_date.strftime("%Y.%m.%d %H:%M:%S"),
-                "value": self.value}
+        return {"value": self.value,
+               "expire_date": self.expire_date.strftime("%Y.%m.%d %H:%M:%S")}
 
     @staticmethod
     def from_dict(dict: Dict):
