@@ -108,7 +108,7 @@ class SimpleDB:
         try:
             data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
             with gzip.open(tempname, "wb") as file:
-                file.write(json.dumps(data).encode("UTF-8"))
+                file.write(json.dumps(data, indent=2).encode("UTF-8"))
             shutil.move(tempname, self.__filename)
         finally:
             os.remove(tempname) if os.path.exists(tempname) else None
