@@ -100,7 +100,7 @@ class SimpleDB:
         return {}
 
     def __store(self):
-        tempname = self.__filename + "." + str(range(10000)) + ".temp"
+        tempname = self.__filename + ".temp"
         try:
             self.__remove_expired()
         except Exception as e:
