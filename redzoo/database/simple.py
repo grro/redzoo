@@ -32,13 +32,18 @@ class SimpleDB:
 
     def __init__(self, name: str, sync_period_sec:int = 5*60):
         self.sync_period_sec = sync_period_sec
-        directory = site_data_dir("simpledb", appauthor=False)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        self.__filename = os.path.join(directory, name + ".json.gz")
+        self.__name = name
+        self.__directory = site_data_dir("simpledb", appauthor=False)
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
-        logging.info("simple db: using " + self.__filename + " (" + str(len(self.__data)) + " entries)")
+        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries)")
+
+    @property
+    def filename(self):
+        if not os.path.exists(self.__directory):
+            logging.info("directory " + self.__directory + " does not exits. Creating it")
+            os.makedirs(self.__directory)
+        return os.path.join(self.__directory, self.__name + ".json.gz")
 
     def __len__(self):
         return len(self.__data)
@@ -89,27 +94,28 @@ class SimpleDB:
                 del self.__data[key]
 
     def __load(self) -> Dict:
-        if os.path.isfile(self.__filename):
-            with gzip.open(self.__filename, "rb") as file:
+        if os.path.isfile(self.filename):
+            with gzip.open(self.filename, "rb") as file:
                 try:
                     json_data = file.read()
                     data = json.loads(json_data.decode("UTF-8"))
                     return {name: Entry.from_dict(data[name]) for name in data.keys()}
                 except Exception as e:
-                    logging.warning("could not load " + self.__filename + " " + str(e))
+                    logging.warning("could not load " + self.filename + " " + str(e))
         return {}
 
     def __store(self):
-        tempname = self.__filename + ".temp"
         try:
             self.__remove_expired()
         except Exception as e:
             logging.info("error occurred removing expired records " + str(e))
+
+        tempname = self.filename + ".temp"
         try:
             data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
-            with gzip.open(tempname, "wb") as file:
-                file.write(json.dumps(data, indent=2).encode("UTF-8"))
-            shutil.move(tempname, self.__filename)
+            with gzip.open(tempname, "wb") as tempfile:
+                tempfile.write(json.dumps(data, indent=2).encode("UTF-8"))
+            shutil.move(tempname, self.filename)
         finally:
             os.remove(tempname) if os.path.exists(tempname) else None
 
