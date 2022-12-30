@@ -3,6 +3,7 @@ import json
 import gzip
 import shutil
 import logging
+from random import randint
 from datetime import datetime, timedelta
 from appdirs import site_data_dir
 from typing import Any, Dict, List
@@ -61,7 +62,7 @@ class SimpleDB:
 
     def put(self, key: str, value: Any, ttl_sec: int = 1000*365*24*60*60):  # default ttl: 1000 years
         self.__data[key] = Entry(value, datetime.now() + timedelta(seconds=ttl_sec))
-        if datetime.now() > (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
+        if datetime.now() >= (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
             self.__store()
             self.__last_time_stored = datetime.now()
 
@@ -110,7 +111,7 @@ class SimpleDB:
         except Exception as e:
             logging.info("error occurred removing expired records " + str(e))
 
-        tempname = self.filename + ".temp"
+        tempname = self.filename + "." + str(randint(0, 10000)) + ".temp"
         try:
             data = {name: self.__data[name].to_dict() for name in self.__data.keys()}
             with gzip.open(tempname, "wb") as tempfile:
