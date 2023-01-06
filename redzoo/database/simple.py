@@ -54,7 +54,7 @@ class SimpleDB:
         for key in list(self.__data.keys()):
             entry = self.__data[key]
             if not entry.is_expired():
-                keys.add(entry.value)
+                keys.add(key)
         return list(keys)
 
     def has(self, key) -> bool:
