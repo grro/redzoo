@@ -24,6 +24,12 @@ class Entry:
         return {"value": self.value,
                "expire_date": self.expire_date.strftime("%Y.%m.%d %H:%M:%S")}
 
+    def __str__(self):
+        return str(self.value) + " (ttl=" + self.expire_date.strftime("%d.%m %H:%M") + ")"
+
+    def __repr__(self):
+        return self.__str__()
+
     @staticmethod
     def from_dict(dict: Dict):
         return Entry(dict['value'], datetime.strptime(dict['expire_date'], "%Y.%m.%d %H:%M:%S"))
