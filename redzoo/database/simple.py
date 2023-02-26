@@ -37,7 +37,7 @@ class Entry:
 
 class SimpleDB:
 
-    def __init__(self, name: str, sync_period_sec:int = 5*60):
+    def __init__(self, name: str, sync_period_sec:int = None):
         self.sync_period_sec = sync_period_sec
         self.__name = name
         self.__directory = site_data_dir("simpledb", appauthor=False)
@@ -66,9 +66,22 @@ class SimpleDB:
     def has(self, key) -> bool:
         return key in self.keys()
 
-    def put(self, key: str, value: Any, ttl_sec: int = 1000*365*24*60*60):  # default ttl: 1000 years
-        self.__data[key] = Entry(value, datetime.now() + timedelta(seconds=ttl_sec))
-        if datetime.now() >= (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
+    def put(self, key: str, value: Any, ttl_sec: int = None):  # default: "infinite"
+        # compute expire date
+        if ttl_sec is None:
+            expire_date = datetime.strptime("2999-01-01", '%Y-%m-%d')
+        else:
+            expire_date = datetime.now() + timedelta(seconds=ttl_sec)
+
+        # avoid unnecessary write
+        entry = self.__data.get(key, None)
+        if entry is not None:
+            if entry.value == value and entry.expire_date == expire_date:
+                return
+
+        # add and store
+        self.__data[key] = Entry(value, expire_date)
+        if self.sync_period_sec is None or datetime.now() >= (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
             self.__store()
             self.__last_time_stored = datetime.now()
 
@@ -88,7 +101,11 @@ class SimpleDB:
         return values
 
     def delete(self, key):
-        del self.__data[key]
+        if key in self.__data.keys():
+            del self.__data[key]
+            if self.sync_period_sec is None or datetime.now() >= (self.__last_time_stored + timedelta(seconds=self.sync_period_sec)):
+                self.__store()
+                self.__last_time_stored = datetime.now()
 
     def clear(self):
         self.__data = {}
@@ -100,7 +117,7 @@ class SimpleDB:
             if entry.is_expired():
                 del self.__data[key]
 
-    def __load(self) -> Dict:
+    def __load(self) -> Dict[str, Entry]:
         if os.path.isfile(self.filename):
             with gzip.open(self.filename, "rb") as file:
                 try:
