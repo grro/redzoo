@@ -3,7 +3,7 @@ from datetime import timedelta
 
 
 
-def duration(elapsed_seconds, digits: int = 0):
+def duration(elapsed_seconds, digits: int = 0) -> str:
     if isinstance(elapsed_seconds, timedelta):
         elapsed_seconds = elapsed_seconds.total_seconds()
 
