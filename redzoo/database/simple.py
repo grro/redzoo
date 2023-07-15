@@ -43,7 +43,7 @@ class SimpleDB:
         self.__directory = site_data_dir("simpledb", appauthor=False)
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
-        logging.debug("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries)")
+        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries)")
 
     @property
     def filename(self):
