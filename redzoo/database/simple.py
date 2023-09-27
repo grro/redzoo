@@ -10,7 +10,6 @@ from typing import Any, Dict, List
 
 
 
-
 class Entry:
 
     def __init__(self, value: Any, expire_date: datetime):
@@ -85,19 +84,22 @@ class SimpleDB:
             self.__store()
             self.__last_time_stored = datetime.now()
 
+    def __copy(self, data):
+        return json.loads(json.dumps(data))
+
     def get(self, key: str, default_value: Any = None):
         entry = self.__data.get(key, None)
         if entry is None or entry.is_expired():
             return default_value
         else:
-            return entry.value
+            return self.__copy(entry.value)
 
     def get_values(self):
         values = []
         for key in list(self.__data.keys()):
             entry = self.__data[key]
             if not entry.is_expired():
-                values.append(entry.value)
+                values.append(self.__copy(entry.value))
         return values
 
     def delete(self, key):

@@ -1,5 +1,6 @@
 import unittest
 from time import sleep
+from typing import List
 from redzoo.database.simple import SimpleDB
 
 
@@ -26,8 +27,19 @@ class SimpleDbTest(unittest.TestCase):
         self.assertIs(88, db.get("3", 88))
         self.assertIs(55, db.get("4"))
 
+    def test_dict(self):
+        db = SimpleDB("liat")
+        db.clear()
+        db.put("1", [2])
+        self.assertEqual([2], db.get("1"))
 
-    def test_db_persistence(self):
+        l: List = list(db.get("1"))
+        l.append(5)
+        db.put("1", l)
+        self.assertEqual([2, 5], db.get("1"))
+
+
+def test_db_persistence(self):
         db = SimpleDB("test2")
         db.clear()
         db.put("1", 5)
@@ -35,6 +47,7 @@ class SimpleDbTest(unittest.TestCase):
 
         db = SimpleDB("test2")
         self.assertIs(5, db.get("1"))
+
 
 if __name__ == '__main__':
     unittest.main()
