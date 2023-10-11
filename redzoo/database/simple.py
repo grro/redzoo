@@ -94,7 +94,11 @@ class SimpleDB:
         else:
             return self.__copy(entry.value)
 
-    def get_values(self):
+    def get_values(self) -> List:
+        logging.warning("SimpleDB#get_values is deprecated. Use SimpleDB#get_values instead")
+        return self.values()
+
+    def values(self) -> List:
         values = []
         for key in list(self.__data.keys()):
             entry = self.__data[key]
