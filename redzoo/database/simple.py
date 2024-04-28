@@ -36,10 +36,13 @@ class Entry:
 
 class SimpleDB:
 
-    def __init__(self, name: str, sync_period_sec:int = None):
+    def __init__(self, name: str, sync_period_sec:int = None, directory: str = None):
         self.sync_period_sec = sync_period_sec
         self.__name = name
-        self.__directory = site_data_dir("simpledb", appauthor=False)
+        if directory is None:
+            self.__directory = site_data_dir("simpledb", appauthor=False)
+        else:
+            self.__directory = directory
         self.__data = self.__load()
         self.__last_time_stored = datetime.now()
         logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries)")
