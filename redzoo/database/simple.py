@@ -7,6 +7,7 @@ from random import randint
 from datetime import datetime, timedelta
 from appdirs import site_data_dir
 from typing import Any, Dict, List
+from redzoo.math.display import size
 
 
 
@@ -45,9 +46,7 @@ class SimpleDB:
             self.__directory = directory
         self.__data = self.__load()
         self.__last_time_stored = datetime.now() - timedelta(days=2)
-
-        file_size_kb = int(os.stat(self.filename).st_size / 1024)
-        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + str(file_size_kb) + " KB)")
+        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + size(os.stat(self.filename).st_size) )
 
     @property
     def filename(self):
@@ -100,7 +99,7 @@ class SimpleDB:
             return self.__copy(entry.value)
 
     def get_values(self) -> List:
-        logging.warning("SimpleDB#get_values is deprecated. Use SimpleDB#get_values instead")
+        logging.warning("SimpleDB#get_values is deprecated. Use SimpleDB#values instead")
         return self.values()
 
     def values(self) -> List:

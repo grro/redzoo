@@ -16,3 +16,17 @@ def duration(elapsed_seconds, digits: int = 0) -> str:
     else:
         seconds = round(elapsed_seconds, digits)
         return str(seconds if digits>0 else int(seconds)) + " sec"
+
+
+
+def size(bytes, digits: int = 0) -> str:
+
+    if bytes > (1000 * 1000):
+        hours = round(bytes / (1000 * 1000), digits)
+        return str(hours if digits>0 else int(hours)) + " MB"
+    elif bytes > 1000:
+        hours = round(bytes / (1000), digits)
+        return str(hours if digits>0 else int(hours)) + " KB"
+    else:
+        bytes = round(bytes, digits)
+        return str(bytes if digits>0 else int(bytes)) + " byte"
