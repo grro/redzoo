@@ -46,7 +46,7 @@ class SimpleDB:
             self.__directory = directory
         self.__data = self.__load()
         self.__last_time_stored = datetime.now() - timedelta(days=2)
-        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + size(os.stat(self.filename).st_size) )
+        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + size(os.stat(self.filename).st_size) + ")")
 
     @property
     def filename(self):
