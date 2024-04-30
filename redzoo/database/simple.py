@@ -7,7 +7,7 @@ from random import randint
 from datetime import datetime, timedelta
 from appdirs import site_data_dir
 from typing import Any, Dict, List
-from redzoo.math.display import size
+from redzoo.math.display import formatted_size
 
 
 
@@ -46,7 +46,7 @@ class SimpleDB:
             self.__directory = directory
         self.__data = self.__load()
         self.__last_time_stored = datetime.now() - timedelta(days=2)
-        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + size(os.stat(self.filename).st_size) + ")")
+        logging.info("simple db: using " + self.filename + " (" + str(len(self.__data)) + " entries; " + formatted_size(os.stat(self.filename).st_size) + ")")
 
     @property
     def filename(self):

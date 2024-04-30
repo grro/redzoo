@@ -19,7 +19,7 @@ def duration(elapsed_seconds, digits: int = 0) -> str:
 
 
 
-def size(bytes, digits: int = 0) -> str:
+def formatted_size(bytes, digits: int = 0) -> str:
 
     if bytes > (1000 * 1000):
         hours = round(bytes / (1000 * 1000), digits)
